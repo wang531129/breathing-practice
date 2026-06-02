@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let targetCycles = 10;
     let activeTheme = 'stellar';
     let visualMode = 'ring'; // 'ring' 或 'box' (幾何軌道)
+    let wakeLock = null;
 
     // ==========================================================================
     // 2. DOM 元素獲取
@@ -415,6 +416,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
+    // 4A. 螢幕喚醒鎖：練習時避免手機自動休眠
+    // ==========================================================================
+    async function requestWakeLock() {
+        if (!('wakeLock' in navigator) || wakeLock) return;
+
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+                wakeLock = null;
+            });
+        } catch (error) {
+            wakeLock = null;
+        }
+    }
+
+    async function releaseWakeLock() {
+        if (!wakeLock) return;
+
+        const lockToRelease = wakeLock;
+        wakeLock = null;
+        try {
+            await lockToRelease.release();
+        } catch (error) {
+            // Wake Lock 可能已被瀏覽器自動釋放，這裡不需要額外處理。
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && appState === STATE_BREATHING) {
+            requestWakeLock();
+        }
+    });
+
+    // ==========================================================================
     // 5. 呼吸狀態機與邏輯引擎
     // ==========================================================================
     
@@ -443,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
+        requestWakeLock();
         updateControlsUI();
         runAnimationLoop();
     }
@@ -454,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             timerInterval = null;
         }
         
+        releaseWakeLock();
         stopAmbientSound();
         updateControlsUI();
     }
@@ -471,6 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
             animationFrameId = null;
         }
         
+        releaseWakeLock();
         stopAmbientSound();
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
@@ -626,6 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
         phaseDesc.textContent = `太棒了！您完成了 ${completedCycles} 次完整的${METHODS[currentMethod].name}練習。點擊下方按鈕以重新開始。`;
         
         updateStatsPanel();
+        releaseWakeLock();
         stopAmbientSound();
         updateControlsUI();
         resetBtn.classList.add('disabled');
