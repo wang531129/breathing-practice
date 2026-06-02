@@ -1028,23 +1028,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 面板滑動展示控制
+    function openPanel(panelToOpen, panelToClose) {
+        panelToClose.classList.remove('show');
+        panelToClose.classList.add('hidden');
+        panelToOpen.classList.remove('hidden');
+        requestAnimationFrame(() => panelToOpen.classList.add('show'));
+    }
+
+    function closePanel(panel) {
+        panel.classList.remove('show');
+        panel.addEventListener('transitionend', () => {
+            if (!panel.classList.contains('show')) {
+                panel.classList.add('hidden');
+            }
+        }, { once: true });
+    }
+
     settingsToggleBtn.addEventListener('click', () => {
-        settingsPanel.classList.add('show');
-        statsPanel.classList.remove('show');
+        openPanel(settingsPanel, statsPanel);
     });
 
     settingsCloseBtn.addEventListener('click', () => {
-        settingsPanel.classList.remove('show');
+        closePanel(settingsPanel);
     });
 
     statsToggleBtn.addEventListener('click', () => {
-        statsPanel.classList.add('show');
-        settingsPanel.classList.remove('show');
+        openPanel(statsPanel, settingsPanel);
         updateStatsPanel();
     });
 
     statsCloseBtn.addEventListener('click', () => {
-        statsPanel.classList.remove('show');
+        closePanel(statsPanel);
     });
 
     // ==========================================================================
