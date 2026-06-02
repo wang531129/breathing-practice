@@ -1,0 +1,1160 @@
+/* ==========================================================================
+   Pneuma - 箱式呼吸應用程式樣式表 (CSS Design System - Upgraded)
+   ========================================================================== */
+
+/* 1. 設計系統變數與初始化 */
+:root {
+    /* Google Fonts */
+    --font-primary: 'Inter', sans-serif;
+    --font-display: 'Outfit', sans-serif;
+
+    /* 預設主題：星空夜幕 (Stellar Night) */
+    --bg-gradient: radial-gradient(circle at 50% 50%, #1a153b 0%, #0d0a1a 100%);
+    --primary-color: #a78bfa;
+    --primary-glow: rgba(167, 139, 250, 0.4);
+    --secondary-color: #ec4899;
+    --secondary-glow: rgba(236, 72, 153, 0.4);
+    --accent-color: #38bdf8;
+    --gradient-start: #a78bfa;
+    --gradient-end: #ec4899;
+    --orb-1-color: rgba(76, 29, 149, 0.6);
+    --orb-2-color: rgba(219, 39, 119, 0.4);
+    --orb-3-color: rgba(30, 58, 138, 0.5);
+
+    /* 玻璃擬態基本參數 */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-focus: rgba(255, 255, 255, 0.2);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-inverse: #0f172a;
+    
+    /* 動態狀態參數 (由 JS 更新) */
+    --ring-scale: 1;
+    --ring-opacity: 0.8;
+    --ring-blur: 8px;
+    --ring-color-dynamic: var(--primary-color);
+}
+
+/* 晨曦森林 (Morning Forest) 主題 */
+[data-theme-active="forest"] {
+    --bg-gradient: radial-gradient(circle at 50% 50%, #064e3b 0%, #022c22 100%);
+    --primary-color: #34d399;
+    --primary-glow: rgba(52, 211, 153, 0.4);
+    --secondary-color: #2dd4bf;
+    --secondary-glow: rgba(45, 212, 191, 0.4);
+    --accent-color: #a7f3d0;
+    --gradient-start: #34d399;
+    --gradient-end: #0d9488;
+    --orb-1-color: rgba(6, 78, 59, 0.8);
+    --orb-2-color: rgba(13, 148, 136, 0.4);
+    --orb-3-color: rgba(20, 83, 45, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+}
+
+/* 霞光海洋 (Sunset Ocean) 主題 */
+[data-theme-active="sunset"] {
+    --bg-gradient: radial-gradient(circle at 50% 50%, #4c1d95 0%, #1e1b4b 100%);
+    --primary-color: #fb923c;
+    --primary-glow: rgba(251, 146, 60, 0.4);
+    --secondary-color: #db2777;
+    --secondary-glow: rgba(219, 39, 119, 0.4);
+    --accent-color: #fef08a;
+    --gradient-start: #fb923c;
+    --gradient-end: #db2777;
+    --orb-1-color: rgba(88, 28, 135, 0.7);
+    --orb-2-color: rgba(124, 58, 237, 0.4);
+    --orb-3-color: rgba(154, 52, 18, 0.6);
+}
+
+/* 全域重設與基本樣式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: #09070f;
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 2. 背景奢華光暈 Orb 效果 */
+.app-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-gradient);
+    z-index: -2;
+    overflow: hidden;
+    transition: background 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
+    mix-blend-mode: screen;
+    animation: float 25s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+    width: 50vw;
+    height: 50vw;
+    top: -10vw;
+    left: -10vw;
+    background: var(--orb-1-color);
+}
+
+.orb-2 {
+    width: 60vw;
+    height: 60vw;
+    bottom: -20vw;
+    right: -10vw;
+    background: var(--orb-2-color);
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 40vw;
+    height: 40vw;
+    top: 30vh;
+    left: 40vw;
+    background: var(--orb-3-color);
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    100% {
+        transform: translate(8%, 12%) scale(1.15) rotate(180deg);
+    }
+}
+
+/* 3. 主容器佈局 */
+.app-container {
+    width: 100%;
+    max-width: 540px;
+    height: 100vh;
+    min-height: 680px;
+    max-height: 960px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+
+/* 4. 頂部導覽區 */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+    animation: heartbeat 4s infinite ease-in-out;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.logo-text {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--text-main) 30%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.icon-button {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+}
+
+.icon-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-button:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border);
+    transform: translateY(-2px);
+}
+
+.icon-button:active {
+    transform: translateY(0);
+}
+
+/* 主題下拉選單 */
+.theme-selector-dropdown {
+    position: relative;
+}
+
+.theme-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: rgba(15, 12, 30, 0.85);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 16px;
+    padding: 8px;
+    min-width: 140px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    transform: translateY(10px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.theme-dropdown-content.show {
+    display: block;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.theme-dropdown-content button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.theme-dropdown-content button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+}
+
+/* 5. 主要呼吸練習區 */
+.breathing-stage-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 20px 0;
+}
+
+/* 模式切換器 */
+.visualizer-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    padding: 4px;
+    backdrop-filter: blur(10px);
+}
+
+.visualizer-toggle button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.visualizer-toggle button.active {
+    background: var(--glass-border-focus);
+    color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 視覺化核心區包裝 */
+.visualizer-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 5A. 模式一：能量呼吸光圈 (Ring) */
+.ring-visualizer {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ring-core {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
+    border: 2px solid var(--text-main);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    transform: scale(var(--ring-scale));
+    transition: transform 0.5s cubic-bezier(0.1, 0.8, 0.25, 1);
+    z-index: 3;
+}
+
+.ring-pulse {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--ring-color-dynamic);
+    opacity: var(--ring-opacity);
+    filter: blur(var(--ring-blur));
+    transform: scale(var(--ring-scale));
+    transition: all 0.5s cubic-bezier(0.1, 0.8, 0.25, 1);
+}
+
+.pulse-1 {
+    width: 160px;
+    height: 160px;
+    box-shadow: inset 0 0 15px var(--ring-color-dynamic), 0 0 20px var(--ring-color-dynamic);
+    z-index: 2;
+}
+
+.pulse-2 {
+    width: 210px;
+    height: 210px;
+    opacity: calc(var(--ring-opacity) * 0.7);
+    filter: blur(calc(var(--ring-blur) * 1.5));
+    box-shadow: inset 0 0 25px var(--ring-color-dynamic), 0 0 35px var(--ring-color-dynamic);
+    transition-delay: 0.05s;
+    z-index: 1;
+}
+
+.pulse-3 {
+    width: 260px;
+    height: 260px;
+    opacity: calc(var(--ring-opacity) * 0.4);
+    filter: blur(calc(var(--ring-blur) * 2));
+    box-shadow: 0 0 50px var(--ring-color-dynamic);
+    transition-delay: 0.1s;
+    z-index: 0;
+}
+
+/* 5B. 模式二：自適應幾何軌道 (Box) */
+.box-visualizer {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.box-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.04);
+    stroke-width: 8px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    transition: d 0.8s cubic-bezier(0.16, 1, 0.3, 1); /* 幾何路徑變形過渡 */
+}
+
+.box-progress {
+    fill: none;
+    stroke: url(#box-glow-grad); /* 進度條漸層流光 */
+    stroke-width: 6px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 846; /* 總長度，由 JS 動態調整 offset */
+    stroke-dashoffset: 846; 
+    transition: d 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke-dashoffset 0.25s linear;
+}
+
+.box-orb {
+    fill: var(--text-main);
+    stroke: var(--primary-color);
+    stroke-width: 2px;
+    box-shadow: 0 0 15px var(--primary-glow);
+    transition: cx 0.25s linear, cy 0.25s linear;
+}
+
+/* 5C. 中央文字指示器 */
+.counter-display {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.breathing-phase {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+    animation: phase-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.breathing-timer {
+    font-family: var(--font-display);
+    font-size: 80px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, var(--text-main) 40%, rgba(255,255,255,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+}
+
+.breathing-instruction {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    max-width: 180px;
+    line-height: 1.5;
+    min-height: 40px;
+}
+
+@keyframes phase-in {
+    0% { transform: scale(0.9); opacity: 0; filter: blur(4px); }
+    100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+
+/* 6. 控制按鈕與進度指示 */
+.action-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+.main-btn {
+    border: none;
+    border-radius: 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.play-btn {
+    flex-grow: 1;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    color: var(--text-main);
+    box-shadow: 0 8px 30px var(--primary-glow);
+}
+
+.play-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px var(--primary-glow);
+}
+
+.play-btn:active {
+    transform: translateY(-1px);
+}
+
+.play-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.reset-btn {
+    width: 56px; /* 預設圓形按鈕 */
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    overflow: hidden;
+    padding: 0;
+}
+
+.reset-btn:hover:not(.disabled) {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    transform: translateY(-2px);
+}
+
+.reset-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.6s ease;
+}
+
+.reset-btn:hover svg {
+    transform: rotate(-180deg);
+}
+
+/* 隱藏重設按鈕的文字，大螢幕滑入時可能顯示 */
+.reset-btn span {
+    display: none;
+}
+
+.reset-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* 整體循環進度條 */
+.session-progress-wrapper {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: -10px;
+    animation: fade-in 0.5s ease;
+}
+
+.progress-bar-container {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 3px;
+    box-shadow: 0 0 10px var(--primary-glow);
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 7. 滑出式設定與統計面板 */
+.panel-card {
+    position: absolute;
+    top: 24px;
+    bottom: 24px;
+    width: calc(100% - 48px);
+    max-width: 440px;
+    border-radius: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel {
+    background: rgba(13, 10, 25, 0.75);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+}
+
+/* 設定面板從右側滑出 */
+#settings-panel {
+    right: 24px;
+    transform: translateX(110%);
+    opacity: 0;
+}
+
+#settings-panel.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* 統計面板從左側滑出 */
+#stats-panel {
+    left: 24px;
+    transform: translateX(-110%);
+    opacity: 0;
+}
+
+#stats-panel.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* 面板頂部 */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.panel-header h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* 面板內容 */
+.panel-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* 捲軸美化 */
+.panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.setting-group h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 預設按鈕排版 */
+.preset-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.preset-btn {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 12px;
+    border-radius: 14px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.preset-btn:hover {
+    color: var(--text-main);
+    border-color: var(--glass-border-focus);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.preset-btn.active {
+    background: rgba(167, 139, 250, 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 10px rgba(167, 139, 250, 0.1);
+}
+
+/* 滑桿美化與自適應禁用 */
+.range-slider-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.range-slider-wrapper.disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    transform: scale(0.98);
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.slider-value {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid var(--glass-border);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-main);
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--primary-glow);
+    transition: transform 0.1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* 下拉選單樣式 */
+.select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.select-wrapper label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+select {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    padding: 12px 16px;
+    font-family: var(--font-primary);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%2394a3b8' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+}
+
+select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* 切換開關 */
+.toggle-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-main);
+    padding: 4px 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider-switch {
+    background-color: rgba(167, 139, 250, 0.2);
+    border-color: var(--primary-color);
+}
+
+input:checked + .slider-switch:before {
+    transform: translateX(20px);
+    background-color: var(--primary-color);
+    box-shadow: 0 0 6px var(--primary-glow);
+}
+
+/* 8. 數據統計面板樣式 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 16px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--glass-border-focus);
+}
+
+.stat-icon {
+    font-size: 20px;
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* 圖表 */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chart-container h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.chart-wrapper {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.stats-chart {
+    width: 100%;
+    height: 100%;
+}
+
+.chart-grid-line {
+    stroke: rgba(255, 255, 255, 0.04);
+    stroke-width: 1px;
+}
+
+.chart-axis-line {
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 1px;
+}
+
+.chart-text {
+    fill: var(--text-muted);
+    font-size: 9px;
+    font-family: var(--font-primary);
+}
+
+.chart-line {
+    fill: none;
+    stroke: url(#chart-grad);
+    stroke-width: 3.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 4px 8px var(--primary-glow));
+}
+
+.chart-area {
+    fill: url(#chart-area-grad);
+}
+
+.chart-point {
+    fill: var(--text-main);
+    stroke: var(--secondary-color);
+    stroke-width: 2.5px;
+    cursor: pointer;
+    transition: r 0.2s;
+}
+
+.chart-point:hover {
+    r: 6;
+}
+
+/* 統計腳部 */
+.stats-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.danger-btn {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: rgba(239, 68, 68, 0.7);
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.danger-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+/* 9. 響應式微調 (Desktop RWD) */
+@media (min-width: 1024px) {
+    /* 桌面版排版：左邊為統計、中間為呼吸、右邊為設定 */
+    body {
+        align-items: center;
+        justify-content: center;
+        background: #07050b;
+    }
+
+    .app-container {
+        max-width: 1200px;
+        height: auto;
+        min-height: 700px;
+        max-height: 860px;
+        display: grid;
+        grid-template-columns: 320px 1fr 340px;
+        grid-template-rows: auto 1fr;
+        gap: 24px;
+        padding: 40px;
+    }
+
+    .app-header {
+        grid-column: 1 / 4;
+    }
+
+    /* 頂部隱藏多餘按鈕 */
+    #settings-toggle-btn, #stats-toggle-btn {
+        display: none;
+    }
+
+    /* 中央呼吸區 */
+    .breathing-stage-container {
+        grid-column: 2 / 3;
+        grid-row: 2 / 3;
+        justify-content: center;
+        padding: 0;
+    }
+
+    /* 設定面板在桌面直接固定在右側 */
+    #settings-panel {
+        grid-column: 3 / 4;
+        grid-row: 2 / 3;
+        position: static;
+        width: 100%;
+        transform: none !important;
+        opacity: 1 !important;
+        display: flex !important;
+        height: 100%;
+    }
+
+    #settings-panel .close-btn {
+        display: none; /* 隱藏關閉按鈕 */
+    }
+
+    /* 統計面板在桌面直接固定在左側 */
+    #stats-panel {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        position: static;
+        width: 100%;
+        transform: none !important;
+        opacity: 1 !important;
+        display: flex !important;
+        height: 100%;
+    }
+
+    #stats-panel .close-btn {
+        display: none; /* 隱藏關閉按鈕 */
+    }
+
+    /* 讓桌面版的結束按鈕更實用 */
+    .reset-btn {
+        width: auto;
+        padding: 0 20px;
+    }
+    .reset-btn span {
+        display: inline;
+    }
+}
+
+/* 行動端小螢幕微調 */
+@media (max-height: 740px) and (max-width: 1023px) {
+    .breathing-stage-container {
+        gap: 20px;
+    }
+    .visualizer-wrapper {
+        width: 260px;
+        height: 260px;
+    }
+    .ring-visualizer {
+        width: 220px;
+        height: 220px;
+    }
+    .ring-core {
+        width: 100px;
+        height: 100px;
+    }
+    .pulse-1 { width: 130px; height: 130px; }
+    .pulse-2 { width: 170px; height: 170px; }
+    .pulse-3 { width: 220px; height: 220px; }
+    .breathing-timer {
+        font-size: 64px;
+    }
+}
