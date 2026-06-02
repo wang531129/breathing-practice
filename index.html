@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneuma - 呼吸練習與心靈療癒 (Box, Resonant & 478 Breathing)</title>
+    
+    <!-- Meta SEO 標籤 -->
+    <meta name="description" content="Pneuma 是一個精美且療癒的呼吸練習工具。整合了經典箱式呼吸、諧振共振呼吸、以及助眠 4-7-8 呼吸法，配合生成式雙耳波頻環境音與頌缽導引，幫助您快速平衡自律神經、釋放焦慮、找回專注與深層睡眠。">
+    <meta name="keywords" content="箱式呼吸, 諧振呼吸, 478呼吸法, 呼吸練習, 減壓, 專注力, 冥想, 雙耳波頻, 頌缽, 靜心, 焦慮緩解, 助眠">
+    <meta name="author" content="Antigravity AI">
+    
+    <!-- Google Fonts 導入 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS 連結 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <main class="app-container">
+        <!-- 頂部導覽列 -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                </svg>
+                <h1 class="logo-text">Pneuma</h1>
+            </div>
+            
+            <div class="header-actions">
+                <!-- 主題切換按鈕 -->
+                <div class="theme-selector-dropdown">
+                    <button class="icon-button" id="theme-btn" aria-label="切換主題" title="切換主題">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                            <circle cx="12" cy="12" r="4" />
+                        </svg>
+                    </button>
+                    <div class="theme-dropdown-content" id="theme-dropdown">
+                        <button data-theme="stellar">🌌 星空夜幕</button>
+                        <button data-theme="forest">🌲 晨曦森林</button>
+                        <button data-theme="sunset">🌅 霞光海洋</button>
+                    </div>
+                </div>
+                
+                <!-- 數據統計按鈕 -->
+                <button class="icon-button" id="stats-toggle-btn" aria-label="查看統計數據" title="查看統計數據">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                </button>
+
+                <!-- 設定按鈕 -->
+                <button class="icon-button" id="settings-toggle-btn" aria-label="開啟設定" title="開啟設定">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要視覺化顯示區 -->
+        <section class="breathing-stage-container">
+            <!-- 視覺模式切換器 -->
+            <div class="visualizer-toggle">
+                <button class="active" id="btn-mode-ring" data-mode="ring">光圈模式</button>
+                <button id="btn-mode-box" data-mode="box">幾何軌道</button>
+            </div>
+
+            <!-- 動態視覺核心 -->
+            <div class="visualizer-wrapper">
+                
+                <!-- 視覺化方式一：能量呼吸光圈 (Ring) -->
+                <div class="ring-visualizer" id="ring-container">
+                    <div class="ring-pulse pulse-3"></div>
+                    <div class="ring-pulse pulse-2"></div>
+                    <div class="ring-pulse pulse-1"></div>
+                    <div class="ring-core"></div>
+                </div>
+
+                <!-- 視覺化方式二：自適應幾何軌道 (Box / Adaptive Paths) - 預設隱藏 -->
+                <div class="box-visualizer hidden" id="box-container">
+                    <svg class="box-svg" viewBox="0 0 300 300">
+                        <defs>
+                            <linearGradient id="box-glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--gradient-start)" />
+                                <stop offset="100%" stop-color="var(--gradient-end)" />
+                            </linearGradient>
+                            <filter id="shadow-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="8" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+                        <!-- 背景幾何軌道 (JS 動態重繪) -->
+                        <path class="box-track" id="box-track-path" d="M 40,40 L 260,40 L 260,260 L 40,260 Z" />
+                        <!-- 動態進度條 (JS 動態重繪) -->
+                        <path class="box-progress" id="box-progress-path" d="M 40,40 L 260,40 L 260,260 L 40,260 Z" />
+                        <!-- 追光軌跡發光球 -->
+                        <circle class="box-orb" cx="40" cy="40" r="10" id="box-glow-orb" filter="url(#shadow-glow)" />
+                    </svg>
+                </div>
+
+                <!-- 中央文字與計時資訊 -->
+                <div class="counter-display">
+                    <div class="breathing-phase" id="phase-title">準備開始</div>
+                    <div class="breathing-timer" id="timer-seconds">0</div>
+                    <div class="breathing-instruction" id="phase-desc">點擊下方按鈕以展開練習</div>
+                </div>
+
+            </div>
+
+            <!-- 主控制按鈕組 -->
+            <div class="action-controls">
+                <button class="main-btn play-btn" id="start-pause-btn">
+                    <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    <svg class="icon-pause hidden" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="4" width="4" height="16" rx="1" />
+                        <rect x="14" y="4" width="4" height="16" rx="1" />
+                    </svg>
+                    <span id="btn-text">開始練習</span>
+                </button>
+                <button class="main-btn reset-btn disabled" id="reset-btn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span>結束</span>
+                </button>
+            </div>
+            
+            <!-- 整體循環進度指示 -->
+            <div class="session-progress-wrapper hidden" id="session-progress-area">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="session-progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    循環次數: <span id="completed-cycles">0</span> / <span id="target-cycles">10</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 滑出式/右側設定面板 -->
+        <aside class="panel-card glass-panel hidden" id="settings-panel">
+            <div class="panel-header">
+                <h2>練習設定</h2>
+                <button class="close-btn" id="settings-close-btn">&times;</button>
+            </div>
+            
+            <div class="panel-content">
+                <!-- 1. 選擇呼吸練習法 -->
+                <div class="setting-group">
+                    <h3>選擇呼吸練習法</h3>
+                    <div class="select-wrapper">
+                        <select id="method-select" style="width: 100%; font-weight: 500; font-family: var(--font-primary);">
+                            <option value="box" selected>⬛ 箱式呼吸 (Box Breathing)</option>
+                            <option value="resonant">➖ 諧振呼吸 (Resonant / Coherent)</option>
+                            <option value="478">🔺 478 呼吸法 (4-7-8 Breathing)</option>
+                        </select>
+                    </div>
+                    <div class="method-description-box glass-panel" id="method-desc-text" style="padding: 14px; border-radius: 14px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.01);">
+                        <!-- 由 JS 動態替換 -->
+                    </div>
+                </div>
+
+                <!-- 2. 預設模式快速選擇 -->
+                <div class="setting-group">
+                    <h3>預設模式</h3>
+                    <div class="preset-buttons" id="preset-container">
+                        <!-- 由 JS 動態載入對應呼吸法的預設按鈕 -->
+                    </div>
+                </div>
+
+                <!-- 3. 自訂各階段秒數 -->
+                <div class="setting-group">
+                    <h3>自訂呼吸時間</h3>
+                    
+                    <div class="range-slider-wrapper" id="wrapper-inhale">
+                        <div class="slider-header">
+                            <span>吸氣時間 (Inhale)</span>
+                            <span class="slider-value" id="val-inhale">4 秒</span>
+                        </div>
+                        <input type="range" id="slider-inhale" min="2" max="10" value="4" step="1">
+                    </div>
+
+                    <div class="range-slider-wrapper" id="wrapper-hold1">
+                        <div class="slider-header">
+                            <span>吸氣後憋氣 (Hold In)</span>
+                            <span class="slider-value" id="val-hold1">4 秒</span>
+                        </div>
+                        <input type="range" id="slider-hold1" min="0" max="10" value="4" step="1">
+                    </div>
+
+                    <div class="range-slider-wrapper" id="wrapper-exhale">
+                        <div class="slider-header">
+                            <span>呼氣時間 (Exhale)</span>
+                            <span class="slider-value" id="val-exhale">4 秒</span>
+                        </div>
+                        <input type="range" id="slider-exhale" min="2" max="10" value="4" step="1">
+                    </div>
+
+                    <div class="range-slider-wrapper" id="wrapper-hold2">
+                        <div class="slider-header">
+                            <span>呼氣後憋氣 (Hold Out)</span>
+                            <span class="slider-value" id="val-hold2">4 秒</span>
+                        </div>
+                        <input type="range" id="slider-hold2" min="0" max="10" value="4" step="1">
+                    </div>
+                </div>
+
+                <!-- 練習目標循環數 -->
+                <div class="setting-group">
+                    <div class="slider-header">
+                        <h3>目標呼吸循環數</h3>
+                        <span class="slider-value" id="val-cycles">10 次</span>
+                    </div>
+                    <input type="range" id="slider-cycles" min="3" max="30" value="10" step="1">
+                </div>
+
+                <!-- 療癒聲音配置 -->
+                <div class="setting-group">
+                    <h3>療癒聲音導引</h3>
+                    
+                    <!-- 背景音樂選擇 -->
+                    <div class="select-wrapper">
+                        <label for="ambient-select">背景環境音</label>
+                        <select id="ambient-select">
+                            <option value="none">無背景音樂</option>
+                            <option value="binaural" selected>療癒雙耳波頻 (Binaural Beats)</option>
+                            <option value="ocean">溫柔海洋潮汐 (Synthesized Wave)</option>
+                        </select>
+                    </div>
+
+                    <!-- 音效開關組 -->
+                    <div class="toggle-control-row">
+                        <span>階段過渡頌缽磬聲</span>
+                        <label class="switch">
+                            <input type="checkbox" id="chime-toggle" checked>
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-control-row">
+                        <span>人聲語音引導</span>
+                        <label class="switch">
+                            <input type="checkbox" id="voice-toggle">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 滑出式/左側統計數據面板 -->
+        <aside class="panel-card glass-panel hidden" id="stats-panel">
+            <div class="panel-header">
+                <h2>您的練習數據</h2>
+                <button class="close-btn" id="stats-close-btn">&times;</button>
+            </div>
+            
+            <div class="panel-content">
+                <!-- 三大核心指標卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="stat-streak">0</div>
+                        <div class="stat-label">連續練習天數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value" id="stat-total-time">0</div>
+                        <div class="stat-label">累計時長 (分鐘)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌀</div>
+                        <div class="stat-value" id="stat-total-cycles">0</div>
+                        <div class="stat-label">累計呼吸循環</div>
+                    </div>
+                </div>
+
+                <!-- 過去 7 日練習記錄 SVG 折線圖 -->
+                <div class="chart-container">
+                    <h3>過去 7 日練習時長 (分鐘)</h3>
+                    <div class="chart-wrapper">
+                        <svg class="stats-chart" id="svg-chart" viewBox="0 0 350 180">
+                            <!-- 由 JS 動態生成折線、網格與標籤 -->
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 清除資料選項 -->
+                <div class="stats-footer">
+                    <button class="danger-btn" id="clear-stats-btn">清除所有數據</button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- JS 連結 -->
+    <script src="app.js"></script>
+</body>
+</html>
