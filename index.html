@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS 連結 -->
-    <link rel="stylesheet" href="style.css?v=20260603e">
+    <link rel="stylesheet" href="style.css?v=20260603f">
 </head>
 <body>
     <div class="app-background">
@@ -313,7 +313,10 @@
     </main>
 
     <!-- JS 連結 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
-    <script src="app.js?v=20260603e"></script>
+    <script type="module">
+        import NoSleep from 'https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js';
+        window.NoSleep = NoSleep;
+    </script>
+    <script src="app.js?v=20260603f"></script>
 </body>
 </html>
