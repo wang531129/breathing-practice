@@ -86,6 +86,15 @@ body {
     align-items: center;
 }
 
+body.sleep-session::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.52);
+}
+
 /* 2. 背景奢華光暈 Orb 效果 */
 .app-background {
     position: fixed;
