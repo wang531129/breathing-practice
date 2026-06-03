@@ -76,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTheme = 'stellar';
     let visualMode = 'ring'; // 'ring' 或 'box' (幾何軌道)
     let wakeLock = null;
+    let noSleepFallback = null;
+    let noSleepFallbackEnabled = false;
 
     function isSleep478Mode() {
         return currentMethod === '478';
@@ -433,7 +435,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // 4A. 螢幕喚醒鎖：練習時避免手機自動休眠
     // ==========================================================================
+    function requestNoSleepFallback() {
+        if (!window.NoSleep || noSleepFallbackEnabled) return;
+
+        try {
+            if (!noSleepFallback) {
+                noSleepFallback = new window.NoSleep();
+            }
+            noSleepFallback.enable();
+            noSleepFallbackEnabled = true;
+        } catch (error) {
+            noSleepFallbackEnabled = false;
+        }
+    }
+
+    function releaseNoSleepFallback() {
+        if (!noSleepFallback || !noSleepFallbackEnabled) return;
+
+        try {
+            noSleepFallback.disable();
+        } catch (error) {
+            // 備援防休眠可能已經被瀏覽器釋放。
+        }
+        noSleepFallbackEnabled = false;
+    }
+
     async function requestWakeLock() {
+        requestNoSleepFallback();
+
         if (!('wakeLock' in navigator) || wakeLock) return;
 
         try {
@@ -447,6 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function releaseWakeLock() {
+        releaseNoSleepFallback();
+
         if (!wakeLock) return;
 
         const lockToRelease = wakeLock;
