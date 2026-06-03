@@ -92,7 +92,7 @@ body.sleep-session::after {
     inset: 0;
     z-index: 5000;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.52);
+    background: rgba(0, 0, 0, 0.72);
 }
 
 /* 2. 背景奢華光暈 Orb 效果 */
