@@ -77,6 +77,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let visualMode = 'ring'; // 'ring' 或 'box' (幾何軌道)
     let wakeLock = null;
 
+    function isSleep478Mode() {
+        return currentMethod === '478';
+    }
+
+    function getGuidanceVolume() {
+        if (!isSleep478Mode()) return 1;
+
+        const progress = targetCycles > 0 ? completedCycles / targetCycles : 0;
+        return Math.max(0.22, 1 - progress * 0.78);
+    }
+
     // ==========================================================================
     // 2. DOM 元素獲取
     // ==========================================================================
@@ -357,13 +368,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const now = audioCtx.currentTime;
+        const guidanceVolume = getGuidanceVolume();
         const fundamental = 293.66; // D4 基頻
         const harmonics = [1, 1.5, 2.0, 2.61, 3.0, 3.82, 4.2];
         const gains = [0.6, 0.35, 0.25, 0.15, 0.1, 0.05, 0.03];
         
         const mainGain = audioCtx.createGain();
         mainGain.gain.setValueAtTime(0.001, now);
-        mainGain.gain.linearRampToValueAtTime(0.4, now + 0.02);
+        mainGain.gain.linearRampToValueAtTime(0.4 * guidanceVolume, now + 0.02);
         mainGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.5);
         mainGain.connect(audioCtx.destination);
 
@@ -405,8 +417,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'zh-TW';
-        utterance.rate = 0.9;
-        utterance.pitch = 0.95;
+        utterance.rate = isSleep478Mode() ? 0.82 : 0.9;
+        utterance.pitch = isSleep478Mode() ? 0.9 : 0.95;
+        utterance.volume = getGuidanceVolume();
 
         const voices = window.speechSynthesis.getVoices();
         const preferredVoice = voices.find(v => v.lang.includes('zh-TW') || v.lang.includes('zh-CN'));
@@ -451,6 +464,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function enableSleepDisplayMode() {
+        if (isSleep478Mode()) {
+            body.classList.add('sleep-session');
+        }
+    }
+
+    function disableSleepDisplayMode() {
+        body.classList.remove('sleep-session');
+    }
+
     // ==========================================================================
     // 5. 呼吸狀態機與邏輯引擎
     // ==========================================================================
@@ -481,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         requestWakeLock();
+        enableSleepDisplayMode();
         updateControlsUI();
         runAnimationLoop();
     }
@@ -493,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         releaseWakeLock();
+        disableSleepDisplayMode();
         stopAmbientSound();
         updateControlsUI();
     }
@@ -511,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         releaseWakeLock();
+        disableSleepDisplayMode();
         stopAmbientSound();
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
@@ -667,6 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateStatsPanel();
         releaseWakeLock();
+        disableSleepDisplayMode();
         stopAmbientSound();
         updateControlsUI();
         resetBtn.classList.add('disabled');
@@ -947,6 +974,21 @@ document.addEventListener('DOMContentLoaded', () => {
         valExhale.textContent = `${timings[PHASE_EXHALE]} 秒`;
         valHold2.textContent = `${timings[PHASE_HOLD_OUT]} 秒`;
 
+        if (isSleep478Mode()) {
+            targetCycles = 30;
+            sliderCycles.value = 30;
+            sliderCycles.disabled = true;
+            valCycles.textContent = '30 次';
+            chimeToggle.checked = true;
+            voiceToggle.checked = true;
+            chimeToggle.disabled = true;
+            voiceToggle.disabled = true;
+        } else {
+            sliderCycles.disabled = false;
+            chimeToggle.disabled = false;
+            voiceToggle.disabled = false;
+        }
+
         // 判定哪些滑桿在當前呼吸法下不需要，予以半透明禁用，提高 UX
         if (defaults[PHASE_HOLD_IN] === 0) {
             wrapperHold1.classList.add('disabled');
@@ -1013,6 +1055,11 @@ document.addEventListener('DOMContentLoaded', () => {
             timings[PHASE_EXHALE] = parseFloat(sliderExhale.value);
             timings[PHASE_HOLD_OUT] = parseFloat(sliderHold2.value);
             targetCycles = parseInt(sliderCycles.value);
+
+            if (isSleep478Mode()) {
+                targetCycles = 30;
+                sliderCycles.value = 30;
+            }
 
             valInhale.textContent = `${timings[PHASE_INHALE]} 秒`;
             valHold1.textContent = `${timings[PHASE_HOLD_IN]} 秒`;
