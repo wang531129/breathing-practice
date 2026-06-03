@@ -115,10 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsToggleBtn = document.getElementById('settings-toggle-btn');
     const settingsPanel = document.getElementById('settings-panel');
     const settingsCloseBtn = document.getElementById('settings-close-btn');
+    const settingsDoneBtn = document.getElementById('settings-done-btn');
     
     const statsToggleBtn = document.getElementById('stats-toggle-btn');
     const statsPanel = document.getElementById('stats-panel');
     const statsCloseBtn = document.getElementById('stats-close-btn');
+    const statsDoneBtn = document.getElementById('stats-done-btn');
     
     // 呼吸法與描述
     const methodSelect = document.getElementById('method-select');
@@ -1084,19 +1086,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     settingsToggleBtn.addEventListener('click', () => {
-        openPanel(settingsPanel, statsPanel);
+        if (settingsPanel.classList.contains('show')) {
+            closePanel(settingsPanel);
+        } else {
+            openPanel(settingsPanel, statsPanel);
+        }
     });
 
     settingsCloseBtn.addEventListener('click', () => {
         closePanel(settingsPanel);
     });
 
+    settingsDoneBtn.addEventListener('click', () => {
+        closePanel(settingsPanel);
+    });
+
     statsToggleBtn.addEventListener('click', () => {
-        openPanel(statsPanel, settingsPanel);
-        updateStatsPanel();
+        if (statsPanel.classList.contains('show')) {
+            closePanel(statsPanel);
+        } else {
+            openPanel(statsPanel, settingsPanel);
+            updateStatsPanel();
+        }
     });
 
     statsCloseBtn.addEventListener('click', () => {
+        closePanel(statsPanel);
+    });
+
+    statsDoneBtn.addEventListener('click', () => {
         closePanel(statsPanel);
     });
 
