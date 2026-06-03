@@ -1056,6 +1056,26 @@ input:checked + .slider-switch:before {
     color: #ef4444;
 }
 
+.panel-action-footer {
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(13, 10, 25, 0.88);
+}
+
+.panel-done-btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    color: var(--text-main);
+    font-family: var(--font-primary);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px var(--primary-glow);
+}
+
 /* 9. 響應式微調 (Desktop RWD) */
 @media (min-width: 1024px) {
     /* 桌面版排版：左邊為統計、中間為呼吸、右邊為設定 */
@@ -1110,6 +1130,10 @@ input:checked + .slider-switch:before {
         display: none; /* 隱藏關閉按鈕 */
     }
 
+    #settings-panel .panel-action-footer {
+        display: none;
+    }
+
     /* 統計面板在桌面直接固定在左側 */
     #stats-panel {
         grid-column: 1 / 2;
@@ -1124,6 +1148,10 @@ input:checked + .slider-switch:before {
 
     #stats-panel .close-btn {
         display: none; /* 隱藏關閉按鈕 */
+    }
+
+    #stats-panel .panel-action-footer {
+        display: none;
     }
 
     /* 讓桌面版的結束按鈕更實用 */
