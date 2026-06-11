@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. 狀態與常數定義
     // ==========================================================================
     const STATE_IDLE = 'IDLE';
+    const STATE_COUNTDOWN = 'COUNTDOWN';
     const STATE_BREATHING = 'BREATHING';
     const STATE_PAUSED = 'PAUSED';
 
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let appState = STATE_IDLE;
     let currentPhase = PHASE_PREPARE;
     let timerInterval = null;
+    let countdownInterval = null;
     let animationFrameId = null;
 
     // 時間設定 (秒)
@@ -490,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && appState === STATE_BREATHING) {
+        if (document.visibilityState === 'visible' && (appState === STATE_COUNTDOWN || appState === STATE_BREATHING)) {
             requestWakeLock();
         }
     });
@@ -510,6 +512,51 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     
     // 初始化或重置計時器狀態
+    function clearCountdownTimer() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+    }
+
+    function showCountdownValue(value) {
+        phaseTitle.textContent = '準備';
+        timerSeconds.textContent = value;
+        phaseDesc.textContent = '請放鬆身體，跟著倒數準備開始。';
+    }
+
+    function beginBreathingAfterCountdown() {
+        if (appState !== STATE_COUNTDOWN) return;
+
+        clearCountdownTimer();
+        appState = STATE_BREATHING;
+        transitionToPhase(PHASE_INHALE);
+        updateControlsUI();
+    }
+
+    function startCountdown() {
+        let countdownValue = 3;
+
+        currentPhase = PHASE_PREPARE;
+        phaseTotalDurationMs = 3000;
+        phaseStartTime = Date.now();
+        phaseTimeElapsed = 0;
+        showCountdownValue(countdownValue);
+
+        clearCountdownTimer();
+        countdownInterval = setInterval(() => {
+            countdownValue--;
+
+            if (countdownValue > 0) {
+                showCountdownValue(countdownValue);
+                return;
+            }
+
+            timerSeconds.textContent = '開始';
+            beginBreathingAfterCountdown();
+        }, 1000);
+    }
+
     function startPractice() {
         if (appState === STATE_IDLE) {
             completedCycles = 0;
@@ -517,10 +564,9 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionProgressArea.classList.remove('hidden');
             resetBtn.classList.remove('disabled');
             resetBtn.disabled = false;
-            
-            // 轉換為第一個吸氣階段
-            transitionToPhase(PHASE_INHALE);
-            appState = STATE_BREATHING;
+
+            appState = STATE_COUNTDOWN;
+            startCountdown();
             
             playAmbientSound();
         } else if (appState === STATE_PAUSED) {
@@ -557,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appState = STATE_IDLE;
         currentPhase = PHASE_PREPARE;
         
+        clearCountdownTimer();
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
@@ -737,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function runAnimationLoop() {
         if (appState === STATE_IDLE) return;
 
-        if (appState === STATE_BREATHING) {
+        if (appState === STATE_COUNTDOWN || appState === STATE_BREATHING) {
             phaseTimeElapsed = Date.now() - phaseStartTime;
         }
         
@@ -939,13 +986,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateControlsUI() {
         if (appState === STATE_BREATHING) {
+            startPauseBtn.disabled = false;
             playIcon.classList.add('hidden');
             pauseIcon.classList.remove('hidden');
             btnText.textContent = '暫停';
             startPauseBtn.style.background = 'rgba(255, 255, 255, 0.08)';
             startPauseBtn.style.border = '1px solid var(--glass-border-focus)';
             startPauseBtn.style.boxShadow = 'none';
+        } else if (appState === STATE_COUNTDOWN) {
+            startPauseBtn.disabled = true;
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.add('hidden');
+            btnText.textContent = '準備中';
+            startPauseBtn.style.background = 'rgba(255, 255, 255, 0.08)';
+            startPauseBtn.style.border = '1px solid var(--glass-border-focus)';
+            startPauseBtn.style.boxShadow = 'none';
         } else {
+            startPauseBtn.disabled = false;
             playIcon.classList.remove('hidden');
             pauseIcon.classList.add('hidden');
             btnText.textContent = appState === STATE_IDLE ? '開始練習' : '繼續練習';
