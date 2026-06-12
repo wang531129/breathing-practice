@@ -523,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
         phaseTitle.textContent = '準備';
         timerSeconds.textContent = value;
         phaseDesc.textContent = '請放鬆身體，跟著倒數準備開始。';
+        speakPhasePrompt(String(value));
     }
 
     function beginBreathingAfterCountdown() {
@@ -1064,15 +1065,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isSleep478Mode()) {
             targetCycles = 30;
+            sliderCycles.min = 10;
+            sliderCycles.max = 60;
             sliderCycles.value = 30;
-            sliderCycles.disabled = true;
             valCycles.textContent = '30 次';
             chimeToggle.checked = true;
             voiceToggle.checked = true;
             chimeToggle.disabled = true;
             voiceToggle.disabled = true;
         } else {
-            sliderCycles.disabled = false;
+            sliderCycles.min = 3;
+            sliderCycles.max = 30;
+            if (parseInt(sliderCycles.value) > 30) {
+                sliderCycles.value = 30;
+                targetCycles = 30;
+                valCycles.textContent = '30 次';
+            }
             chimeToggle.disabled = false;
             voiceToggle.disabled = false;
         }
@@ -1143,11 +1151,6 @@ document.addEventListener('DOMContentLoaded', () => {
             timings[PHASE_EXHALE] = parseFloat(sliderExhale.value);
             timings[PHASE_HOLD_OUT] = parseFloat(sliderHold2.value);
             targetCycles = parseInt(sliderCycles.value);
-
-            if (isSleep478Mode()) {
-                targetCycles = 30;
-                sliderCycles.value = 30;
-            }
 
             valInhale.textContent = `${timings[PHASE_INHALE]} 秒`;
             valHold1.textContent = `${timings[PHASE_HOLD_IN]} 秒`;
