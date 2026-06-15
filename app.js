@@ -80,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let wakeLock = null;
     let noSleepFallback = null;
     let noSleepFallbackEnabled = false;
+    let sleepGuideAudio = null;
+    let sleepGuideObjectUrl = null;
+    let sleepGuideStartedAtCycles = 0;
 
     function isSleep478Mode() {
         return currentMethod === '478';
@@ -90,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const progress = targetCycles > 0 ? completedCycles / targetCycles : 0;
         return Math.max(0.22, 1 - progress * 0.78);
+    }
+
+    function shouldUseSleepGuideAudio() {
+        return isSleep478Mode() && voiceToggle.checked;
     }
 
     // ==========================================================================
@@ -435,7 +442,161 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 4A. 螢幕喚醒鎖：練習時避免手機自動休眠
+    // 4A. 478 鎖屏音訊引導：產生整段可背景播放的提示音
+    // ==========================================================================
+    function addToneToSamples(samples, sampleRate, startTime, duration, frequency, volume, fadeRatio = 0.2) {
+        const startSample = Math.max(0, Math.floor(startTime * sampleRate));
+        const endSample = Math.min(samples.length, Math.floor((startTime + duration) * sampleRate));
+        const fadeSamples = Math.max(1, Math.floor(duration * sampleRate * fadeRatio));
+
+        for (let i = startSample; i < endSample; i++) {
+            const localIndex = i - startSample;
+            const localLength = endSample - startSample;
+            const elapsed = localIndex / sampleRate;
+            const fadeIn = Math.min(1, localIndex / fadeSamples);
+            const fadeOut = Math.min(1, (localLength - localIndex) / fadeSamples);
+            const envelope = Math.min(fadeIn, fadeOut);
+            const mixedSample = samples[i] + Math.sin(2 * Math.PI * frequency * elapsed) * volume * envelope * 0x7fff;
+            samples[i] = Math.max(-0x8000, Math.min(0x7fff, mixedSample));
+        }
+    }
+
+    function addGuideCue(samples, sampleRate, startTime, frequency, volume) {
+        addToneToSamples(samples, sampleRate, startTime, 0.42, frequency, volume);
+        addToneToSamples(samples, sampleRate, startTime + 0.08, 0.55, frequency * 1.5, volume * 0.35);
+    }
+
+    function createWavObjectUrl(samples, sampleRate) {
+        const dataSize = samples.length * 2;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        const writeString = (offset, value) => {
+            for (let i = 0; i < value.length; i++) {
+                view.setUint8(offset + i, value.charCodeAt(i));
+            }
+        };
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + dataSize, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, dataSize, true);
+
+        let offset = 44;
+        for (let i = 0; i < samples.length; i++) {
+            view.setInt16(offset, samples[i], true);
+            offset += 2;
+        }
+
+        return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+    }
+
+    function buildSleepGuideAudioUrl() {
+        const sampleRate = 12000;
+        const countdownSeconds = 3;
+        const cycleSeconds = timings[PHASE_INHALE] + timings[PHASE_HOLD_IN] + timings[PHASE_EXHALE] + timings[PHASE_HOLD_OUT];
+        const totalSeconds = countdownSeconds + targetCycles * cycleSeconds + 3;
+        const samples = new Int16Array(Math.ceil(totalSeconds * sampleRate));
+
+        addGuideCue(samples, sampleRate, 0, 660, 0.24);
+        addGuideCue(samples, sampleRate, 1, 660, 0.22);
+        addGuideCue(samples, sampleRate, 2, 660, 0.2);
+
+        for (let cycle = 0; cycle < targetCycles; cycle++) {
+            const progress = targetCycles > 1 ? cycle / (targetCycles - 1) : 0;
+            const volume = Math.max(0.07, 0.22 - progress * 0.14);
+            let cursor = countdownSeconds + cycle * cycleSeconds;
+
+            addGuideCue(samples, sampleRate, cursor, 523.25, volume);
+            cursor += timings[PHASE_INHALE];
+
+            if (timings[PHASE_HOLD_IN] > 0) {
+                addGuideCue(samples, sampleRate, cursor, 392.0, volume * 0.88);
+                cursor += timings[PHASE_HOLD_IN];
+            }
+
+            addGuideCue(samples, sampleRate, cursor, 293.66, volume * 0.82);
+            cursor += timings[PHASE_EXHALE];
+
+            if (timings[PHASE_HOLD_OUT] > 0) {
+                addGuideCue(samples, sampleRate, cursor, 246.94, volume * 0.7);
+            }
+        }
+
+        const finishTime = countdownSeconds + targetCycles * cycleSeconds;
+        addGuideCue(samples, sampleRate, finishTime, 440, 0.08);
+        addGuideCue(samples, sampleRate, finishTime + 1.0, 330, 0.06);
+
+        return createWavObjectUrl(samples, sampleRate);
+    }
+
+    function stopSleepGuideAudio() {
+        if (sleepGuideAudio) {
+            sleepGuideAudio.pause();
+            sleepGuideAudio.removeAttribute('src');
+            sleepGuideAudio.load();
+            sleepGuideAudio = null;
+        }
+
+        if (sleepGuideObjectUrl) {
+            URL.revokeObjectURL(sleepGuideObjectUrl);
+            sleepGuideObjectUrl = null;
+        }
+    }
+
+    function pauseSleepGuideAudio() {
+        if (sleepGuideAudio && !sleepGuideAudio.paused) {
+            sleepGuideAudio.pause();
+        }
+    }
+
+    function resumeSleepGuideAudio() {
+        if (sleepGuideAudio && sleepGuideAudio.paused) {
+            sleepGuideAudio.play().catch(() => {});
+        }
+    }
+
+    function saveRemainingSleepGuideProgress() {
+        const missingCycles = Math.max(0, targetCycles - completedCycles);
+        if (missingCycles === 0) return;
+
+        const singleCycleSeconds = timings[PHASE_INHALE] + timings[PHASE_HOLD_IN] + timings[PHASE_EXHALE] + timings[PHASE_HOLD_OUT];
+        saveSessionProgress(missingCycles, singleCycleSeconds * missingCycles);
+        completedCycles = targetCycles;
+        updateProgressUI();
+    }
+
+    function startSleepGuideAudio() {
+        if (!shouldUseSleepGuideAudio()) return;
+
+        stopSleepGuideAudio();
+        sleepGuideStartedAtCycles = completedCycles;
+        sleepGuideObjectUrl = buildSleepGuideAudioUrl();
+        sleepGuideAudio = new Audio(sleepGuideObjectUrl);
+        sleepGuideAudio.preload = 'auto';
+        sleepGuideAudio.setAttribute('playsinline', '');
+        sleepGuideAudio.addEventListener('ended', () => {
+            if (isSleep478Mode() && (appState === STATE_COUNTDOWN || appState === STATE_BREATHING || appState === STATE_PAUSED)) {
+                saveRemainingSleepGuideProgress();
+                finishPractice();
+            }
+        }, { once: true });
+        sleepGuideAudio.play().catch(() => {
+            stopSleepGuideAudio();
+        });
+    }
+
+    // ==========================================================================
+    // 4B. 螢幕喚醒鎖：練習時避免手機自動休眠
     // ==========================================================================
     function requestNoSleepFallback() {
         if (!window.NoSleep || noSleepFallbackEnabled) return;
@@ -567,6 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetBtn.disabled = false;
 
             appState = STATE_COUNTDOWN;
+            startSleepGuideAudio();
             startCountdown();
             
             playAmbientSound();
@@ -579,6 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ambientSelect.value !== 'none') {
                 playAmbientSound();
             }
+            resumeSleepGuideAudio();
         }
         
         requestWakeLock();
@@ -597,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
         releaseWakeLock();
         disableSleepDisplayMode();
         stopAmbientSound();
+        pauseSleepGuideAudio();
         updateControlsUI();
     }
 
@@ -617,6 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
         releaseWakeLock();
         disableSleepDisplayMode();
         stopAmbientSound();
+        stopSleepGuideAudio();
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
         }
@@ -774,6 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
         releaseWakeLock();
         disableSleepDisplayMode();
         stopAmbientSound();
+        stopSleepGuideAudio();
         updateControlsUI();
         resetBtn.classList.add('disabled');
         resetBtn.disabled = true;
