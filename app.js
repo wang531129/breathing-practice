@@ -542,6 +542,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopSleepGuideAudio() {
         if (sleepGuideAudio) {
             sleepGuideAudio.pause();
+            if (sleepGuideAudio.parentNode) {
+                sleepGuideAudio.parentNode.removeChild(sleepGuideAudio);
+            }
             sleepGuideAudio.removeAttribute('src');
             sleepGuideAudio.load();
             sleepGuideAudio = null;
@@ -583,7 +586,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sleepGuideObjectUrl = buildSleepGuideAudioUrl();
         sleepGuideAudio = new Audio(sleepGuideObjectUrl);
         sleepGuideAudio.preload = 'auto';
+        sleepGuideAudio.controls = false;
+        sleepGuideAudio.style.display = 'none';
         sleepGuideAudio.setAttribute('playsinline', '');
+        document.body.appendChild(sleepGuideAudio);
         sleepGuideAudio.addEventListener('ended', () => {
             if (isSleep478Mode() && (appState === STATE_COUNTDOWN || appState === STATE_BREATHING || appState === STATE_PAUSED)) {
                 saveRemainingSleepGuideProgress();
